@@ -20,6 +20,8 @@ var junc = (function() {
     };
 
     var uncomment = function(src) {
+	var result = '';
+
 	var blockCommentStack = [];
 	var lineCommentFlag = false;
 	var quoteStr = null;
@@ -93,8 +95,8 @@ var junc = (function() {
 	    }
 
 	    if (blockCommentStack.length === 1) {
-		if (MARKER.split('').every(function(ch, j) {return ch === str[i + j];})) {
-		    if (str[i + MARKER.length].match(/\s/)) {
+		if (MARKER.split('').every(function(ch, j) {return ch === src[i + j];})) {
+		    if (src[i + MARKER.length].match(/\s/)) {
 			markedFlag = true;
 		    }
 		}
@@ -103,14 +105,23 @@ var junc = (function() {
 	    i++;
 	}
 
+	// TODO
+	var hoge = Object.create(null);
 	markedIndexes.forEach(function(index) {
-	    str[index.start] = '';
-	    str[index.start + 1] = '';
-	    str[index.end] = '';
-	    str[index.end + 1] = '';
+	    hoge[index.start] = true;
+	    hoge[index.start + 1] = true;
+	    hoge[index.start + 2] = true;
+	    hoge[index.end] = true;
+	    hoge[index.end + 1] = true;
+	});
+
+	src.split('').forEach(function(c, i) {
+	    if (!hoge[i]) {
+		result += c;
+	    }
 	});
 	
-	return str;
+	return result.replace(new RegExp('\\s+' + MARKER + '\\s+'), '');
     };
     
     return {
@@ -136,6 +147,10 @@ var junc = (function() {
 		});
 	    };
 	    xhrRecursivery(0);
+	},
+
+	_uncomment: function(src) {
+	    return uncomment(src);
 	}
     };
 })();
