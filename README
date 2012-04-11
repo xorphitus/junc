@@ -1,2 +1,52 @@
 junc is Javascript UNCommenter
 
+USAGE
+  
+  ---------------------
+
+  // foo.js
+  
+  var a = 'A';
+  /*
+  @junc
+  someFunction();
+  */
+  console.log(a);
+
+  ---------------------
+
+  // bar.js
+
+  junc.add('/foo.js');
+  junc.exec();
+
+  ---------------------
+
+  then, foo.js is executed as the following code.
+
+  ---------------------
+
+  // uncommented foo.js
+
+  var a = 'A';
+  someFunction();
+  console.log(a);
+
+  ---------------------
+
+
+WHY UNCOMMENT?
+  
+  Since we can write test codes for functions in any scope.
+
+  for example
+
+  (function() {
+     var innerFunc() { ... };
+     /*
+     @junc
+     testInnerFunc();
+     */
+  })();
+
+  Yes, I know it's not a beautiful way. Test codes should not be written in main programs. However, I don't have any other idea.
