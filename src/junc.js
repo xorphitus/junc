@@ -130,7 +130,7 @@ var junc = (function() {
     };
 
     return {
-        varsion: function() {
+        version: function() {
             return '0.1';
         },
 
