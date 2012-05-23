@@ -1,4 +1,6 @@
 var junc = (function() {
+    'use strict';
+
     var MARKER = '@junc';
 
     var targets = [];
@@ -10,6 +12,9 @@ var junc = (function() {
             // on load complete
             if (req.readyState === 4) {
                 if (req.staus === 200) {
+                    callback(req.responseText);
+                } else if(url.match(/^file:\/\//) && req.status === 0) {
+                    // for local test
                     callback(req.responseText);
                 } else {
                     // TODO
@@ -72,13 +77,13 @@ var junc = (function() {
 
             if (!lineCommentFlag && blockCommentStack.length === 0) {
                 if (quoteStr === '\'') {
-                    if (c === '\'' && str[i - 1] !== '\\') {
+                    if (c === '\'' && src[i - 1] !== '\\') {
                         quoteStr = null;
                     }
                     i++;
                     continue;
                 } else if (quoteStr === '"') {
-                    if (c === '"' && str[i - 1] !== '\\') {
+                    if (c === '"' && src[i - 1] !== '\\') {
                         quoteStr = null;
                     }
                     i++;
@@ -126,7 +131,7 @@ var junc = (function() {
             }
         });
 
-        return result.replace(new RegExp('\\s+' + MARKER + '\\s+'), '');
+        return result.replace(new RegExp('\\s*' + MARKER + '\\s*'), '');
     };
 
     return {
@@ -146,7 +151,7 @@ var junc = (function() {
                     return;
                 }
                 target = targets[index];
-                xhr(url, function(src) {
+                xhr(target, function(src) {
                     eval(uncomment(src));
                     xhrRecursivery(index + 1);
                 });
@@ -154,7 +159,7 @@ var junc = (function() {
             xhrRecursivery(0);
         },
 
-        _uncomment: function(src) {
+        __uncomment: function(src) {
             return uncomment(src);
         }
     };
