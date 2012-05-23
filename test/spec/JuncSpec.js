@@ -84,9 +84,8 @@ describe('junc', function() {
         });
 
         it('should execute without any exception.', function() {
-            junc.add(location.href + '/../spec/test01.js');
+            junc.add(location.href + '/../spec/test01.js?' + new Date());
             junc.exec();
-            expect(testval02).toEqual('TESTVAL01');
         });
     });
 });
