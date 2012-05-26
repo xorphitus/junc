@@ -1,19 +1,22 @@
-var junc = (function() {
+/*global XMLHttpRequest */
+var junc = (function () {
     'use strict';
 
-    var MARKER = '@junc';
+    var MARKER = '@junc',
+        targets = [],
+        // functions
+        xhr,
+        uncomment;
 
-    var targets = [];
-
-    var xhr = function(url, callback) {
+    xhr = function (url, callback) {
         var req = new XMLHttpRequest();
         req.open('GET', url, true);
-        req.onreadystatechange = function(ev) {
+        req.onreadystatechange = function (ev) {
             // on load complete
             if (req.readyState === 4) {
                 if (req.staus === 200) {
                     callback(req.responseText);
-                } else if(url.match(/^file:\/\//) && req.status === 0) {
+                } else if (url.match(/^file:\/\//) && req.status === 0) {
                     // for local test
                     callback(req.responseText);
                 } else {
@@ -24,18 +27,22 @@ var junc = (function() {
         req.send(null);
     };
 
-    var uncomment = function(src) {
-        var result = '';
+    uncomment = function (src) {
+        var result = '',
+            blockCommentStack = [],
+            lineCommentFlag = false,
+            quoteStr = null,
+            markedFlag = false,
+            markedIndexes = [],
+            // vars within loop
+            i = 0,
+            len = src.length,
+            c,
+            //
+            targetIndexes;
 
-        var blockCommentStack = [];
-        var lineCommentFlag = false;
-        var quoteStr = null;
-        var markedFlag = false;
-        var markedIndexes = [];
-
-        var i = 0, len = src.length;
         while (i < len) {
-            var c = src[i];
+            c = src[i];
 
             if (!quoteStr && !lineCommentFlag) {
                 if (c === '*' && src[i + 1]  === '/' && blockCommentStack.length > 0) {
@@ -63,7 +70,7 @@ var junc = (function() {
                 if (lineCommentFlag) {
                     if (c === '\n') {
                         lineCommentFlag = false;
-                        i++;
+                        i = i + 1;
                         continue;
                     }
                 } else {
@@ -80,13 +87,13 @@ var junc = (function() {
                     if (c === '\'' && src[i - 1] !== '\\') {
                         quoteStr = null;
                     }
-                    i++;
+                    i = i + 1;
                     continue;
                 } else if (quoteStr === '"') {
                     if (c === '"' && src[i - 1] !== '\\') {
                         quoteStr = null;
                     }
-                    i++;
+                    i = i + 1;
                     continue;
                 } else {
                     if (c === '\'') {
@@ -94,39 +101,37 @@ var junc = (function() {
                     } else if (c === '"') {
                         quoteStr = '"';
                     }
-                    i++;
+                    i = i + 1;
                     continue;
                 }
             }
 
             if (blockCommentStack.length === 1) {
-                if (MARKER.split('').every(function(ch, j) {return ch === src[i + j];})) {
+                if (MARKER.split('').every(function (ch, j) { return ch === src[i + j]; })) {
                     if (src[i + MARKER.length].match(/\s/)) {
                         markedFlag = true;
                     }
                 }
             }
 
-            i++;
+            i = i + 1;
         }
 
-        // TODO
-        var hoge;
         if (typeof Object.create === 'function') {
-            hoge = Object.create(null);
+            targetIndexes = Object.create(null);
         } else {
-            hoge = {};
+            targetIndexes = {};
         }
-        markedIndexes.forEach(function(index) {
-            hoge[index.start] = true;
-            hoge[index.start + 1] = true;
-            hoge[index.start + 2] = true;
-            hoge[index.end] = true;
-            hoge[index.end + 1] = true;
+        markedIndexes.forEach(function (index) {
+            targetIndexes[index.start] = true;
+            targetIndexes[index.start + 1] = true;
+            targetIndexes[index.start + 2] = true;
+            targetIndexes[index.end] = true;
+            targetIndexes[index.end + 1] = true;
         });
 
-        src.split('').forEach(function(c, i) {
-            if (!hoge[i]) {
+        src.split('').forEach(function (c, i) {
+            if (!targetIndexes[i]) {
                 result += c;
             }
         });
@@ -135,23 +140,24 @@ var junc = (function() {
     };
 
     return {
-        version: function() {
+        version: function () {
             return '0.1';
         },
 
-        add: function(url) {
+        add: function (url) {
             targets.push(url);
         },
 
-        exec: function() {
-            var len = targets.length;
-            var xhrRecursivery = function(index) {
+        exec: function () {
+            var len = targets.length,
+                xhrRecursivery;
+            xhrRecursivery = function (index) {
                 var target;
                 if (index >= len) {
                     return;
                 }
                 target = targets[index];
-                xhr(target, function(src) {
+                xhr(target, function (src) {
                     eval(uncomment(src));
                     xhrRecursivery(index + 1);
                 });
@@ -159,8 +165,8 @@ var junc = (function() {
             xhrRecursivery(0);
         },
 
-        __uncomment: function(src) {
+        __uncomment: function (src) {
             return uncomment(src);
         }
     };
-})();
+}());

@@ -86,6 +86,8 @@ describe('junc', function() {
         it('should execute without any exception.', function() {
             junc.add(location.href + '/../spec/test01.js?' + new Date());
             junc.exec();
+            //var actual = sessionStorage.testval01;
+            //expect(actual).toEqual('TESTVAL01');
         });
     });
 });

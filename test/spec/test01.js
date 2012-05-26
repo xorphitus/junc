@@ -1,3 +1,3 @@
 /* @junc
-var testval01 = 'TESTVAL01';
+sessionStorage.testval01 = 'TESTVAL01';
 */
